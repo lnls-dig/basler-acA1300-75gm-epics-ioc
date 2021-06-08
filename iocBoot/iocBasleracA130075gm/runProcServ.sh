@@ -6,9 +6,9 @@ set +u
 # Parse command-line options
 . ./parseCMDOpts.sh "$@"
 
-# Use defaults if not set
+UNIX_SOCKET=""
 if [ -z "${DEVICE_TELNET_PORT}" ]; then
-   DEVICE_TELNET_PORT="20000"
+    UNIX_SOCKET="true"
 fi
 
 if [ -z "${BASLER_INSTANCE}" ]; then
@@ -18,4 +18,8 @@ fi
 set -u
 
 # Run run*.sh scripts with procServ
-/usr/local/bin/procServ -f -n basler_acA1300_75gm_${BASLER_INSTANCE} -i ^C^D ${DEVICE_TELNET_PORT} ./runBasleracA130075gm.sh "$@"
+if [ "${UNIX_SOCKET}" ]; then
+    /usr/local/bin/procServ -f -n basler_acA1300_75gm_${BASLER_INSTANCE} -i ^C^D unix:./procserv.sock ./runBasleracA130075gm.sh "$@"
+else
+    /usr/local/bin/procServ -f -n basler_acA1300_75gm_${BASLER_INSTANCE} -i ^C^D ${DEVICE_TELNET_PORT} ./runBasleracA130075gm.sh "$@"
+fi
